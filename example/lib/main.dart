@@ -118,6 +118,7 @@ class _MyAppState extends State<MyApp> {
       // height = win.height ~/ 10 * 10;
       start = await FlutterScreenRecording.startRecordScreen("Title",
           width: width, height: height,
+          // delay: 500,
           titleNotification: "dsffad", messageNotification: "sdffd",
       );
     }

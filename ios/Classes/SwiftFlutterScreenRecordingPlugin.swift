@@ -7,14 +7,15 @@ public class SwiftFlutterScreenRecordingPlugin: NSObject, FlutterPlugin {
     
     let recorder = RPScreenRecorder.shared()
 
-var videoOutputURL : URL?
-var videoWriter : AVAssetWriter?
+    var videoOutputURL : URL?
+    var videoWriter : AVAssetWriter?
 
-var audioInput:AVAssetWriterInput!
-var videoWriterInput : AVAssetWriterInput?
-var nameVideo: String = ""
-var recordAudio: Bool = false;
-var myResult: FlutterResult?
+    var audioInput:AVAssetWriterInput!
+    var videoWriterInput : AVAssetWriterInput?
+    var nameVideo: String = ""
+    var recordAudio: Bool = false;
+    var myResult: FlutterResult?
+    var warningDelay: Int = 300;
     
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "flutter_screen_recording", binaryMessenger: registrar.messenger())
@@ -42,6 +43,12 @@ var myResult: FlutterResult?
         } else {
             height = Int32(height as! Int32);
         }
+        let delay = args?["delay"];
+                    if(delay == nil || delay is NSNull) {
+                        self.warningDelay = 300; // Default value
+                    } else {
+                        self.warningDelay = Int(delay as! Int)
+                    }
         startRecording(
             width: width as! Int32 ,
             height: height as! Int32);
@@ -116,15 +123,20 @@ var myResult: FlutterResult?
         //Tell the screen recorder to start capturing and to call the handler
         if #available(iOS 11.0, *) {
             
-            recorder.startCapture(handler: { (cmSampleBuffer, rpSampleType, error) in
-                guard error == nil else {
-                    //Handle error
-                    print("Error starting capture");
-                    self.myResult!(false)
-                    return;
-                }
+            // Impose a delay to be consistent with the use of this plugin on Android
+            // where a delay is necessary. It's not necessary on IOS, but we want
+            // the user experience to be the same.
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(self.warningDelay) ) {
+                [unowned self] in
+                    recorder.startCapture(handler: { (cmSampleBuffer, rpSampleType, error) in
+                    guard error == nil else {
+                        //Handle error
+                        print("Error starting capture");
+                        self.myResult!(false)
+                        return;
+                    }
 
-                switch rpSampleType {
+                    switch rpSampleType {
                     case RPSampleBufferType.video:
 //                        print("Writing video...");
                         if self.videoWriter?.status == AVAssetWriter.Status.unknown {

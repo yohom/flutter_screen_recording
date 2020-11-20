@@ -43,6 +43,10 @@ class FlutterScreenRecordingPlugin(
     var storePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).absolutePath + File.separator
     var videoName: String? = ""
     var recordAudio: Boolean? = false;
+
+    val DEFAULT_WARNING_DELAY : Long = 300; // in milliseconds
+    var warningDelay: Long = DEFAULT_WARNING_DELAY;
+
     private val SCREEN_RECORD_REQUEST_CODE = 333
     private val SCREEN_STOP_RECORD_REQUEST_CODE = 334
 
@@ -69,7 +73,7 @@ class FlutterScreenRecordingPlugin(
                 mMediaProjection?.registerCallback(mMediaProjectionCallback, null)
 
                 mVirtualDisplay = createVirtualDisplay()
-                Timer("delayTimer", false).schedule(500) {
+                Timer("delayTimer", false).schedule(warningDelay) {
                     mMediaRecorder?.start()
                 }
 
@@ -97,6 +101,7 @@ class FlutterScreenRecordingPlugin(
                 recordAudio = call.argument<Boolean?>("audio")
                 val width = call.argument<Int?>("width");
                 val height = call.argument<Int?>("height");
+                warningDelay = call.argument<Int?>("delay")?.toLong() ?: DEFAULT_WARNING_DELAY;
                 setVideoDimensions(width, height);
                 initMediaRecorder();
                 startRecordScreen()
