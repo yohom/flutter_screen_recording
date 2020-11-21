@@ -9,7 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:open_file/open_file.dart';
 import 'package:quiver/async.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(MaterialApp(home:MyApp()));
 
 class MyApp extends StatefulWidget {
   @override
@@ -65,8 +65,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: const Text('Flutter Screen Recording'),
         ),
@@ -78,7 +77,7 @@ class _MyAppState extends State<MyApp> {
                 ? Center(
                     child: RaisedButton(
                       child: Text("Record Screen"),
-                      onPressed: () => startScreenRecord(false),
+                      onPressed: () => startScreenRecord(MediaQuery.of(context).size, false),
                     ),
                   )
                 : Container(),
@@ -86,7 +85,7 @@ class _MyAppState extends State<MyApp> {
                 ? Center(
                     child: RaisedButton(
                       child: Text("Record Screen & audio"),
-                      onPressed: () => startScreenRecord(true),
+                      onPressed: () => startScreenRecord(MediaQuery.of(context).size, true),
                     ),
                   )
                 : Center(
@@ -97,11 +96,12 @@ class _MyAppState extends State<MyApp> {
                   )
           ],
         ),
-      ),
-    );
+      );
+
   }
 
-  startScreenRecord(bool audio) async {
+  startScreenRecord(Size screenSize, bool audio) async {
+    print('startScreenRecord: audio $audio');
     bool start = false;
     await Future.delayed(const Duration(milliseconds: 1000));
 
@@ -111,6 +111,8 @@ class _MyAppState extends State<MyApp> {
           titleNotification: "dsffad",
           messageNotification: "sdffd");
     } else {
+      print("startScreenRecording: mediaquery size is $screenSize");
+      print("startScreenRecording: physicalsize is ${window.physicalSize}");
       int width, height;
       // // Record screen at quarter size, ie file size reduced by x16
       // Size win = window.physicalSize / 4; // Reduce size
