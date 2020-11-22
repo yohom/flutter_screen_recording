@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screen_recording/flutter_screen_recording.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:open_file/open_file.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:quiver/async.dart';
 
 void main() => runApp(MaterialApp(home:MyApp()));
@@ -77,7 +75,7 @@ class _MyAppState extends State<MyApp> {
                 ? Center(
                     child: RaisedButton(
                       child: Text("Record Screen"),
-                      onPressed: () => startScreenRecord(MediaQuery.of(context).size, false),
+                      onPressed: () => startScreenRecord(false),
                     ),
                   )
                 : Container(),
@@ -85,7 +83,7 @@ class _MyAppState extends State<MyApp> {
                 ? Center(
                     child: RaisedButton(
                       child: Text("Record Screen & audio"),
-                      onPressed: () => startScreenRecord(MediaQuery.of(context).size, true),
+                      onPressed: () => startScreenRecord(true),
                     ),
                   )
                 : Center(
@@ -100,27 +98,26 @@ class _MyAppState extends State<MyApp> {
 
   }
 
-  startScreenRecord(Size screenSize, bool audio) async {
+  startScreenRecord(bool audio) async {
     print('startScreenRecord: audio $audio');
     bool start = false;
     await Future.delayed(const Duration(milliseconds: 1000));
-
+    int width, height;
+    // // Record screen at quarter size, ie file size reduced by x16
+    // Size win = window.physicalSize / 4; // Reduce size
+    // width = win.width ~/ 10 * 10; // Round to multiple of 10
+    // height = win.height ~/ 10 * 10;
     if (audio) {
       start = await FlutterScreenRecording.startRecordScreenAndAudio(
           "Title" + _time.toString(),
+          width: width, height: height,
+          delay: 300,
           titleNotification: "dsffad",
           messageNotification: "sdffd");
     } else {
-      print("startScreenRecording: mediaquery size is $screenSize");
-      print("startScreenRecording: physicalsize is ${window.physicalSize}");
-      int width, height;
-      // // Record screen at quarter size, ie file size reduced by x16
-      // Size win = window.physicalSize / 4; // Reduce size
-      // width = win.width ~/ 10 * 10; // Round to multiple of 10
-      // height = win.height ~/ 10 * 10;
       start = await FlutterScreenRecording.startRecordScreen("Title",
           width: width, height: height,
-          // delay: 500,
+          delay: 300,
           titleNotification: "dsffad", messageNotification: "sdffd",
       );
     }

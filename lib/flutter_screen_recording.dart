@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_foreground_plugin/flutter_foreground_plugin.dart';
 
@@ -55,12 +54,36 @@ class FlutterScreenRecording {
     return start;
   }
 
-  /// Records the device screen, with audio, to a video file named
-  /// [name].mp4 on the device. See [FlutterScreenRecoding.startRecordScreen]
-  /// for information about the parameters.
+  /// Records the device screen, with an audio track, to a video file named
+  /// [name].mp4 on the device.
+  /// The parameters [width] and [height] (in pixels) control the dimensions
+  /// of the video that
+  /// is produced, and therefore also the size of the video file. The full
+  /// screen area is always recorded.
+  /// If either [width] or [height] is null the video file will be recorded
+  /// at the full resolution of
+  /// the device screen.
+  ///
+  /// Specify the parameter [delay] in milliseconds to change the delay
+  /// after the capture warning is dismissed before screen
+  /// recording begins. The default value is 300.
+  ///
+  /// On Android, a delay
+  /// is needed otherwise the capture warning's dismissal animation will
+  /// be captured. While a delay is not needed on IOS, it is imposed so
+  /// that the UI behavior on the two platforms is the same.
+  ///
+  /// The parameters [titleNotification] and [messageNotification] are
+  /// the title and content of any notification sent to the user
+  /// by the [ForegroundService] that runs on Android while the screen is being
+  /// recorded.
+  ///
+  /// Note that on some platforms it may cause an error if the video dimensions
+  /// are not multiples of ten. See the example project for code.
   static Future<bool> startRecordScreenAndAudio(String name,
       {int width,
       int height,
+      int delay,
       String titleNotification,
       String messageNotification}) async {
     await _maybeStartFGS(titleNotification, messageNotification);
@@ -69,7 +92,8 @@ class FlutterScreenRecording {
       height = null;
     }
     final bool start = await _channel.invokeMethod('startRecordScreen',
-        {"name": name, "audio": true, "width": width, "height": height});
+        {"name": name, "audio": true, "width": width, "height": height,
+          "delay": delay ?? 300});
     return start;
   }
 
