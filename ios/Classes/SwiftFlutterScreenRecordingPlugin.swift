@@ -17,51 +17,51 @@ public class SwiftFlutterScreenRecordingPlugin: NSObject, FlutterPlugin {
     var myResult: FlutterResult?
     var warningDelay: Int = 300;
     
-  public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "flutter_screen_recording", binaryMessenger: registrar.messenger())
-    let instance = SwiftFlutterScreenRecordingPlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
-  }
-
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-
-    if(call.method == "startRecordScreen"){
-         myResult = result
-         let args = call.arguments as? Dictionary<String, Any>
-
-        self.recordAudio = (args?["audio"] as? Bool?)! ?? false
-        self.nameVideo = (args?["name"] as? String)!+".mp4";
-        var width = args?["width"]; // in pixels
-        if(width == nil || width is NSNull) {
-            width = Int32(UIScreen.main.nativeBounds.width); // pixels
-        } else {
-            width = Int32(width as! Int32);
-        }
-        var height = args?["height"] // in pixels
-        if(height == nil || height is NSNull) {
-            height = Int32(UIScreen.main.nativeBounds.height); // pixels
-        } else {
-            height = Int32(height as! Int32);
-        }
-        let delay = args?["delay"];
-                    if(delay == nil || delay is NSNull) {
-                        self.warningDelay = 300; // Default value
-                    } else {
-                        self.warningDelay = Int(delay as! Int)
-                    }
-        startRecording(
-            width: width as! Int32 ,
-            height: height as! Int32);
-
-    }else if(call.method == "stopRecordScreen"){
-        if(videoWriter != nil){
-            stopRecording()
-            let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
-            result(String(documentsPath.appendingPathComponent(nameVideo)))
-        }
-         result("")
+    public static func register(with registrar: FlutterPluginRegistrar) {
+        let channel = FlutterMethodChannel(name: "flutter_screen_recording", binaryMessenger: registrar.messenger())
+        let instance = SwiftFlutterScreenRecordingPlugin()
+        registrar.addMethodCallDelegate(instance, channel: channel)
     }
-  }
+    
+    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        
+        if(call.method == "startRecordScreen"){
+            myResult = result
+            let args = call.arguments as? Dictionary<String, Any>
+            
+            self.recordAudio = (args?["audio"] as? Bool?)! ?? false
+            self.nameVideo = (args?["name"] as? String)!+".mp4";
+            var width = args?["width"]; // in pixels
+            if(width == nil || width is NSNull) {
+                width = Int32(UIScreen.main.nativeBounds.width); // pixels
+            } else {
+                width = Int32(width as! Int32);
+            }
+            var height = args?["height"] // in pixels
+            if(height == nil || height is NSNull) {
+                height = Int32(UIScreen.main.nativeBounds.height); // pixels
+            } else {
+                height = Int32(height as! Int32);
+            }
+            let delay = args?["delay"];
+            if(delay == nil || delay is NSNull) {
+                self.warningDelay = 300; // Default value
+            } else {
+                self.warningDelay = Int(delay as! Int)
+            }
+            startRecording(
+                width: width as! Int32 ,
+                height: height as! Int32);
+            
+        }else if(call.method == "stopRecordScreen"){
+            if(videoWriter != nil){
+                stopRecording()
+                let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
+                result(String(documentsPath.appendingPathComponent(nameVideo)))
+            }
+            result("")
+        }
+    }
     
     
     
@@ -96,16 +96,16 @@ public class SwiftFlutterScreenRecordingPlugin: NSObject, FlutterPlugin {
                 AVVideoWidthKey  : NSNumber.init(value: width),
                 AVVideoHeightKey : NSNumber.init(value:height),
                 AVVideoCompressionPropertiesKey: [
-                //AVVideoQualityKey: 1,
-                AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
-                AVVideoAverageBitRateKey: 6000000
-               ],
+                    //AVVideoQualityKey: 1,
+                    AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
+                    AVVideoAverageBitRateKey: 6000000
+                ],
             ]
             //Create the asset writer input object which is actually used to write out the video
             self.videoWriterInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: videoSettings);
             self.videoWriterInput?.expectsMediaDataInRealTime = true;
             self.videoWriter?.add(videoWriterInput!);
-
+            
             if(recordAudio){
                 let audioOutputSettings: [String : Any] = [
                     AVNumberOfChannelsKey : 2,
@@ -119,36 +119,35 @@ public class SwiftFlutterScreenRecordingPlugin: NSObject, FlutterPlugin {
                 self.videoWriter?.add(audioInput!);
             }
         }
-
+        
         //Tell the screen recorder to start capturing and to call the handler
         if #available(iOS 11.0, *) {
             NSLog("startRecording: about to start capture after delay...");
-
+            
             // Impose a delay to be consistent with the use of this plugin on Android
             // where a delay is necessary. It's not necessary on IOS, but we want
             // the user experience to be the same.
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(self.warningDelay) ) {
                 [unowned self] in
-                    NSLog("startRecording: ... after delay, call recorder.startCapture")
-                    recorder.startCapture(handler: { (cmSampleBuffer, rpSampleType, error) in
+                NSLog("startRecording: ... after delay, call recorder.startCapture")
+                recorder.startCapture(handler: { (cmSampleBuffer, rpSampleType, error) in
                     guard error == nil else {
                         //Handle error
                         print("Error starting capture");
                         self.myResult!(false)
                         return;
                     }
-
+                    
                     switch rpSampleType {
                     case RPSampleBufferType.video:
-//                        print("Writing video...");
-                         NSLog("startRecording: Writing video...");
+                        //                         NSLog("startRecording: Writing video...");
                         if self.videoWriter?.status == AVAssetWriter.Status.unknown {
-                           self.myResult!(true)
-                           self.videoWriter?.startWriting()
-                           self.videoWriter?.startSession(atSourceTime:  CMSampleBufferGetPresentationTimeStamp(cmSampleBuffer))
+                            self.myResult!(true)
+                            self.videoWriter?.startWriting()
+                            self.videoWriter?.startSession(atSourceTime:  CMSampleBufferGetPresentationTimeStamp(cmSampleBuffer))
                         }else if self.videoWriter?.status == AVAssetWriter.Status.writing {
                             if (self.videoWriterInput?.isReadyForMoreMediaData == true) {
-//                                print("Append sample...");
+                                //                                print("Append sample...");
                                 if  self.videoWriterInput?.append(cmSampleBuffer) == false {
                                     print("Problems writing video")
                                     self.myResult!(false)
@@ -157,32 +156,34 @@ public class SwiftFlutterScreenRecordingPlugin: NSObject, FlutterPlugin {
                         }
                     case RPSampleBufferType.audioMic:
                         if(self.recordAudio){
-//                            print("Writing audio....");
+                            //                            print("Writing audio....");
                             if self.audioInput?.isReadyForMoreMediaData == true {
-                                print("starting audio....");
+                                //                                NSLog("startRecording: starting audio....");
                                 if self.audioInput?.append(cmSampleBuffer) == false {
-                                        print("Problems writing audio")
+                                    print("Problems writing audio")
                                 }
                             }
                         }
                     default:
-//                       print("not a video sample, so ignore");
+                        //                       print("not a video sample, so ignore");
                         break;
                     }
-            } ){(error) in
-                        guard error == nil else {
-                           //Handle error
-                           print("Screen record not allowed");
-                           self.myResult!(false)
-                           return;
-                       }
-                   }
+                } ){(error) in
+                    guard error == nil else {
+                        //Handle error
+                        print("Screen record not allowed");
+                        self.myResult!(false)
+                        return;
+                    }
+                }
+            }
         } else {
             //Fallback on earlier versions
+            NSLog("Screen recording is not available for iOS versions before iOS 11");
         }
         NSLog("startRecording: return")
     }
-
+    
     @objc func stopRecording() {
         //Stop Recording the screen
         if #available(iOS 11.0, *) {
@@ -190,14 +191,14 @@ public class SwiftFlutterScreenRecordingPlugin: NSObject, FlutterPlugin {
                 NSLog("Stopping recording...");
             })
         } else {
-          //  Fallback on earlier versions
+            //  Fallback on earlier versions
         }
-
+        
         self.videoWriterInput?.markAsFinished();
         if(self.recordAudio) {
-             self.audioInput?.markAsFinished();
+            self.audioInput?.markAsFinished();
         }
-
+        
         self.videoWriter?.finishWriting {
             NSLog("Finished writing video");
             //Now save the video
@@ -205,7 +206,7 @@ public class SwiftFlutterScreenRecordingPlugin: NSObject, FlutterPlugin {
                 PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: self.videoOutputURL!)
             })
         }
-
-}
+        
+    }
     
 }
