@@ -72,13 +72,13 @@ var myResult: FlutterResult?
             
             let videoSettings: [String : Any] = [
                 AVVideoCodecKey  : AVVideoCodecH264,
-                AVVideoWidthKey  : UIScreen.main.bounds.width,
-                AVVideoHeightKey : UIScreen.main.bounds.height,
+                AVVideoWidthKey  : UIScreen.main.bounds.width * UIScreen.main.scale,
+                AVVideoHeightKey : UIScreen.main.bounds.height * UIScreen.main.scale,
                 AVVideoCompressionPropertiesKey: [
-                //AVVideoQualityKey: 1,
-                AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
-                AVVideoAverageBitRateKey: 6000000
-               ],
+                    //AVVideoQualityKey: 1,
+                    AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
+                    AVVideoAverageBitRateKey: 6000000,
+                ],
             ]
             //Create the asset writer input object which is actually used to write out the video
             self.videoWriterInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: videoSettings);
