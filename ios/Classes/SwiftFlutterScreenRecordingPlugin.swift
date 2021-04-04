@@ -33,12 +33,13 @@ var myResult: FlutterResult?
          startRecording()
 
     }else if(call.method == "stopRecordScreen"){
-        if(videoWriter != nil){
+        if(videoWriter != nil && recorder.isRecording){
             stopRecording()
             let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
             result(String(documentsPath.appendingPathComponent(nameVideo)))
+        } else {
+            result("")
         }
-         result("")
     }
   }
     
@@ -77,7 +78,7 @@ var myResult: FlutterResult?
                 AVVideoCompressionPropertiesKey: [
                     //AVVideoQualityKey: 1,
                     AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
-                    AVVideoAverageBitRateKey: 3000000,
+                    AVVideoAverageBitRateKey: 6000000,
                 ],
             ]
             //Create the asset writer input object which is actually used to write out the video
