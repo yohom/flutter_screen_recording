@@ -77,7 +77,7 @@ var myResult: FlutterResult?
                 AVVideoCompressionPropertiesKey: [
                     //AVVideoQualityKey: 1,
                     AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
-                    AVVideoAverageBitRateKey: 12000000,
+                    AVVideoAverageBitRateKey: 6000000,
                 ],
             ]
             //Create the asset writer input object which is actually used to write out the video
