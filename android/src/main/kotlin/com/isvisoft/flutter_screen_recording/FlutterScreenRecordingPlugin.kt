@@ -56,7 +56,7 @@ class FlutterScreenRecordingPlugin(
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Boolean {
 
         if (requestCode == SCREEN_RECORD_REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
@@ -66,6 +66,7 @@ class FlutterScreenRecordingPlugin(
                 mMediaProjection = mProjectionManager?.getMediaProjection(resultCode, data)
                 mMediaProjection?.registerCallback(mMediaProjectionCallback, null)
                 mVirtualDisplay = createVirtualDisplay()
+
                 _result.success(true)
                 return true
             } else {
@@ -112,45 +113,58 @@ class FlutterScreenRecordingPlugin(
         }
     }
 
-    fun calculeResolution(screenSize:Point) {
+    fun calculeResolution(screenSize: Point) {
 
-        val screenRatio : Double = (screenSize.x.toDouble()  / screenSize.y.toDouble())
+//        val screenRatio: Double = (screenSize.x.toDouble() / screenSize.y.toDouble())
+//
+//        println(screenSize.x.toString() + " --- " + screenSize.y.toString())
+//        var height: Double = mDisplayWidth / screenRatio;
+//        println("height - " + height)
+//
+//        mDisplayHeight = height.toInt()
 
-        println(screenSize.x.toString() + " --- " + screenSize.y.toString())
-        var height : Double = mDisplayWidth / screenRatio;
-        println("height - " + height)
-
-        mDisplayHeight = height.toInt()
+        // Use the actual screen size, same as on IOS
+        mDisplayWidth = screenSize.x;
+        mDisplayHeight = screenSize.y;
 
 /*        mDisplayWidth = 2560;
         mDisplayHeight = 1440;*/
 
-        println("Scaled Density")
-        //println(metrics.scaledDensity)
-        println("Original Resolution ")
+//        println("Scaled Density")
+//        //println(metrics.scaledDensity)
+//        println("Original Resolution ")
         //println(metrics.widthPixels.toString() + " x " + metrics.heightPixels)
         println("Calcule Resolution ")
         println("$mDisplayWidth x $mDisplayHeight")
     }
 
     fun initMediaRecorder() {
-        mMediaRecorder?.setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION);
         mMediaRecorder?.setVideoSource(MediaRecorder.VideoSource.SURFACE)
 
         //mMediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
         mMediaRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mMediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);//AAC //HE_AAC
-        mMediaRecorder?.setAudioEncodingBitRate(16*44100);
-        mMediaRecorder?.setAudioSamplingRate(44100);
+
+        if (recordAudio!!) {
+            mMediaRecorder?.setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION);
+            mMediaRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);//AAC //HE_AAC
+            mMediaRecorder?.setAudioEncodingBitRate(16 * 44100);
+            mMediaRecorder?.setAudioSamplingRate(44100);
+        }
+
         mMediaRecorder?.setVideoEncoder(MediaRecorder.VideoEncoder.H264)
 
-        println("bbb" + mDisplayWidth.toString() + " " + mDisplayHeight);
+        val windowManager = registrar.context().applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val screenSize = Point()
+        windowManager.defaultDisplay.getRealSize(screenSize);
+        calculeResolution(screenSize);
+
+        println(mDisplayWidth.toString() + " " + mDisplayHeight);
         mMediaRecorder?.setVideoSize(mDisplayWidth, mDisplayHeight)
         mMediaRecorder?.setVideoFrameRate(30)
 
         mMediaRecorder?.setOutputFile("${storePath}${videoName}.mp4")
 
-        println("file --- "+ "${storePath}${videoName}.mp4")
+        println("file --- " + "${storePath}${videoName}.mp4")
 
         mMediaRecorder?.setVideoEncodingBitRate(5 * mDisplayWidth * mDisplayHeight)
         mMediaRecorder?.prepare()
@@ -164,7 +178,7 @@ class FlutterScreenRecordingPlugin(
 
         } catch (e: IOException) {
             println("ERR");
-            Log.d("--INIT-RECORDER", e.message)
+            Log.d("--INIT-RECORDER", e.message ?: "ERROR")
             println("Error startRecordScreen")
             println(e.message)
         }
@@ -182,7 +196,7 @@ class FlutterScreenRecordingPlugin(
             println("stopRecordScreen success")
 
         } catch (e: Exception) {
-            Log.d("--INIT-RECORDER", e.message)
+            Log.d("--INIT-RECORDER", e.message ?: "ERROR")
             println("stopRecordScreen error")
             println(e.message)
 
