@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_foreground_plugin: ^0.8.0
 
 dev_dependencies:
   flutter_test:
