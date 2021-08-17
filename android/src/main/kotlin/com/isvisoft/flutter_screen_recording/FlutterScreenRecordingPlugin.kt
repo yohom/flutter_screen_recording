@@ -193,6 +193,8 @@ class FlutterScreenRecordingPlugin(
 
             mMediaRecorder?.stop()
             mMediaRecorder?.reset()
+
+            mMediaRecorder = null
             println("stopRecordScreen success")
 
         } catch (e: Exception) {
