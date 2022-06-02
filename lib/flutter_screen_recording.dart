@@ -8,8 +8,8 @@ class FlutterScreenRecording {
 
   static Future<bool> startRecordScreen(
     String name, {
-    String titleNotification,
-    String messageNotification,
+    String? titleNotification,
+    String? messageNotification,
   }) async {
     final bool start = await _channel
         .invokeMethod('startRecordScreen', {"name": name, "audio": false});
@@ -18,8 +18,8 @@ class FlutterScreenRecording {
 
   static Future<bool> startRecordScreenAndAudio(
     String name, {
-    String titleNotification,
-    String messageNotification,
+    String? titleNotification,
+    String? messageNotification,
   }) async {
     final bool start = await _channel
         .invokeMethod('startRecordScreen', {"name": name, "audio": true});
